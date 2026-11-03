@@ -1,26 +1,605 @@
 @import "tailwindcss";
 
+/* ---------------------------------------------------------------------------
+   Design tokens — dark cinematic
+   --------------------------------------------------------------------------- */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: #05060a;
+  --surface: #0a0c13;
+  --surface-2: #10131d;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.16);
+  --fg: #f2f3f8;
+  --muted: #b6bbcc; /* body copy: clearly readable on the dark base */
+  --muted-2: #8a90a5; /* labels and metadata */
+  --accent: #22d3ee; /* cyan */
+  --accent-2: #a78bfa; /* violet */
+  --accent-3: #f472b6; /* pink, used sparingly */
+  --glow: rgba(34, 211, 238, 0.35);
+  --glow-2: rgba(167, 139, 250, 0.35);
+  --radius: 1rem;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-muted-2: var(--muted-2);
+  --color-accent: var(--accent);
+  --color-accent-2: var(--accent-2);
+  --color-accent-3: var(--accent-3);
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace;
+
+  --radius-xl: var(--radius);
+  --radius-2xl: calc(var(--radius) * 1.5);
+
+  --animate-marquee: marquee 40s linear infinite;
+  --animate-spin-slow: spin 14s linear infinite;
+  --animate-pulse-soft: pulse-soft 3s ease-in-out infinite;
+
+  @keyframes marquee {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+  @keyframes pulse-soft {
+    0%,
+    100% {
+      opacity: 0.6;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* ---------------------------------------------------------------------------
+   Base
+   --------------------------------------------------------------------------- */
+html {
+  color-scheme: dark;
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans);
+  font-feature-settings: "ss01", "cv11";
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+a,
+button,
+[role="button"] {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Global "pause animations" switch (see src/lib/motion-pref.ts) */
+html.motion-paused *,
+html.motion-paused *::before,
+html.motion-paused *::after {
+  animation-play-state: paused !important;
+}
+
+::selection {
+  background: rgba(34, 211, 238, 0.3);
+  color: #fff;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* Scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+}
+
+/* ---------------------------------------------------------------------------
+   Utilities
+   --------------------------------------------------------------------------- */
+@utility container-x {
+  margin-inline: auto;
+  width: 100%;
+  max-width: 82rem;
+  padding-inline: clamp(1.25rem, 5vw, 4.5rem);
+}
+
+/* Wider, fluid wrapper for the hero so large screens are filled edge to edge. */
+@utility container-hero {
+  margin-inline: auto;
+  width: 100%;
+  max-width: 110rem;
+  padding-inline: clamp(1.25rem, 6vw, 7rem);
+}
+
+/* Standard content tile: one consistent surface for cards. */
+@utility tile {
+  border-radius: 1.25rem;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.025);
+  padding: 1.5rem;
+}
+
+@utility glass {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+@utility text-gradient {
+  background: linear-gradient(120deg, #fff 0%, #cfeff7 40%, var(--accent) 70%, var(--accent-2) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@utility text-gradient-soft {
+  background: linear-gradient(120deg, #ffffff 0%, #c7c9d6 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Readable running text: slightly larger, relaxed leading, capped measure. */
+@utility copy {
+  font-size: 1.0625rem;
+  line-height: 1.7;
+  max-width: 62ch;
+  text-wrap: pretty;
+}
+
+@utility eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+@utility grid-bg {
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+}
+
+@utility noise {
+  position: relative;
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.035;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    mix-blend-mode: overlay;
+  }
+}
+
+@utility border-gradient {
+  position: relative;
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(135deg, rgba(34, 211, 238, 0.6), rgba(167, 139, 250, 0.4), transparent 60%);
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+}
+
+/* Spotlight that follows the cursor on tilt cards (set via CSS vars) */
+@utility spotlight {
+  position: relative;
+  overflow: hidden;
+  &::before {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    background: radial-gradient(
+      600px circle at var(--mx, 50%) var(--my, 50%),
+      rgba(34, 211, 238, 0.12),
+      transparent 40%
+    );
+  }
+  &:hover::before {
+    opacity: 1;
+  }
+}
+
+/* Lenis */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+/* ---------------------------------------------------------------------------
+   Keyframes used via arbitrary animate-[...] utilities
+   --------------------------------------------------------------------------- */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes flow-x {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(400%);
+    opacity: 0;
+  }
+}
+@keyframes flow-y {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(400%);
+    opacity: 0;
+  }
+}
+@keyframes drift {
+  from {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  to {
+    transform: translate(-42%, -58%) scale(1.15);
+  }
+}
+@keyframes dash {
+  to {
+    stroke-dashoffset: -24;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Mascot (src/components/mascot)
+   Joint angles come from CSS variables that Mascot.tsx updates every frame.
+   --------------------------------------------------------------------------- */
+.mascot svg * {
+  transform-box: fill-box;
+}
+.mascot .thigh-l,
+.mascot .thigh-r,
+.mascot .shin-l,
+.mascot .shin-r,
+.mascot .arm-l,
+.mascot .arm-r {
+  transform-origin: 50% 0;
+}
+.mascot .thigh-l {
+  transform: rotate(var(--thigh-l, 0deg));
+}
+.mascot .thigh-r {
+  transform: rotate(var(--thigh-r, 0deg));
+}
+.mascot .shin-l {
+  transform: rotate(var(--shin-l, 0deg));
+}
+.mascot .shin-r {
+  transform: rotate(var(--shin-r, 0deg));
+}
+.mascot .arm-l {
+  transform: rotate(var(--arm-l, 0deg));
+}
+.mascot .arm-r {
+  transform: rotate(var(--arm-r, 0deg));
+}
+.mascot .body {
+  transform-origin: 50% 100%;
+  transform: translateY(var(--body-y, 0px)) rotate(var(--lean, 0deg)) scale(var(--sx, 1), var(--sy, 1));
+  transition: transform 0.12s ease-out;
+}
+.mascot .shadow {
+  transform-origin: center;
+  transform: scaleX(var(--sx, 1));
+  transition: transform 0.12s ease-out;
+}
+.mascot .eye {
+  transform-origin: center;
+  animation: mascot-blink 4.2s ease-in-out infinite;
+}
+.mascot .eye-r {
+  animation-delay: 0.05s;
+}
+.mascot .eye-move {
+  transform: translate(var(--px, 0px), var(--py, 0px)) scale(var(--eye-s, 1));
+  transform-origin: center;
+  transition: transform 0.2s ease-out;
+}
+.mascot .eye-happy {
+  display: none;
+}
+.mascot .zz {
+  opacity: 0;
+}
+.mascot .chest {
+  transform-origin: center;
+  animation: mascot-pulse 2.4s ease-in-out infinite;
+}
+.mascot .antenna-tip {
+  transform-origin: center;
+  animation: mascot-pulse 1.6s ease-in-out infinite;
+}
+
+/* idle: slow breathing */
+.mascot.idle .body {
+  animation: mascot-breathe 3.2s ease-in-out infinite;
+}
+
+/* ducking (fast scroll): squash and squint */
+.mascot.ducking {
+  --sx: 1.12;
+  --sy: 0.8;
+}
+.mascot.ducking .eye {
+  animation: none;
+  transform: scaleY(0.45);
+}
+
+/* excited (new section / waking up): wide eyes, bright antenna */
+.mascot.excited {
+  --eye-s: 1.25;
+}
+.mascot.excited .antenna-tip {
+  animation-duration: 0.35s;
+}
+
+/* happy (clicked): closed smiling eyes */
+.mascot.happy .eye-open {
+  display: none;
+}
+.mascot.happy .eye-happy {
+  display: block;
+}
+.mascot.happy .eye {
+  animation: none;
+}
+
+/* waving: right arm swings up over the head */
+.mascot.waving .arm-r {
+  animation: mascot-wave 0.5s ease-in-out 3;
+}
+
+/* sleeping: eyes shut, lights dim, slow breathing, floating zig-zags */
+.mascot.sleeping .eye {
+  animation: none;
+  transform: scaleY(0.12);
+}
+.mascot.sleeping .body {
+  animation: mascot-breathe 5s ease-in-out infinite;
+}
+.mascot.sleeping .chest,
+.mascot.sleeping .antenna-tip {
+  animation: none;
+  opacity: 0.3;
+}
+.mascot.sleeping .mouth {
+  d: path("M37.5 40 Q40 41.5 42.5 40");
+}
+.mascot.sleeping .zz {
+  animation: mascot-z 2.6s ease-out infinite;
+}
+.mascot.sleeping .zz-2 {
+  animation-delay: 1.3s;
+}
+
+@keyframes mascot-blink {
+  0%,
+  90%,
+  100% {
+    transform: scaleY(1);
+  }
+  93% {
+    transform: scaleY(0.08);
+  }
+}
+@keyframes mascot-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(0.9);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+@keyframes mascot-breathe {
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(1.025);
+  }
+}
+@keyframes mascot-wave {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(-165deg);
+  }
+}
+@keyframes mascot-z {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0);
+  }
+  20% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(5px, -12px);
+  }
+}
+
+/* ---- vehicles (src/components/mascot/vehicles.tsx) ---- */
+.mascot .wheel {
+  transform-origin: center;
+  transform: rotate(var(--wheel, 0deg));
+}
+.mascot .crank {
+  transform-origin: center;
+  transform: rotate(var(--crank, 0deg));
+}
+.mascot .prop {
+  transform-origin: center;
+  opacity: 0.75;
+  animation: mascot-spin 0.14s linear infinite;
+}
+.mascot .flame {
+  transform-origin: 50% 0;
+  animation: mascot-flicker 0.18s ease-in-out infinite alternate;
+}
+.mascot .flame-2 {
+  animation-delay: 0.09s;
+}
+.mascot .puff {
+  opacity: 0;
+  animation: mascot-puff 1.2s ease-out infinite;
+}
+.mascot .puff-2 {
+  animation-delay: 0.4s;
+}
+.mascot .puff-3 {
+  animation-delay: 0.8s;
+}
+/* riding: no idle breathing, no walking lean */
+.mascot.riding .body {
+  animation: none;
+  transform: none;
+}
+@keyframes mascot-spin {
+  to {
+    transform: rotate(180deg);
+  }
+}
+@keyframes mascot-flicker {
+  from {
+    transform: scaleY(0.75) scaleX(0.9);
+    opacity: 0.85;
+  }
+  to {
+    transform: scaleY(1.25) scaleX(1.05);
+    opacity: 1;
+  }
+}
+@keyframes mascot-puff {
+  0% {
+    opacity: 0.7;
+    transform: translate(0, 0) scale(0.6);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-14px, -10px) scale(1.4);
+  }
+}
+
+/* ---- Pixel's tail ---- */
+.mascot .tail {
+  transform-origin: 0% 100%;
+  animation: cat-tail 2.8s ease-in-out infinite alternate;
+}
+.mascot.walking .tail {
+  animation-duration: 0.9s;
+}
+.mascot.excited .tail,
+.mascot.happy .tail {
+  animation-duration: 0.35s;
+}
+.mascot.ducking .tail {
+  animation: none;
+  transform: rotate(-28deg) scaleY(1.12);
+}
+.mascot.sleeping .tail {
+  animation: none;
+  transform: rotate(22deg) scaleX(0.9);
+}
+.mascot.riding .tail {
+  animation-duration: 0.6s;
+}
+@keyframes cat-tail {
+  from {
+    transform: rotate(-10deg);
+  }
+  to {
+    transform: rotate(12deg);
+  }
 }

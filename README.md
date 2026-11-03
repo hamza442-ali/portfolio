@@ -1,36 +1,66 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Ali Hamza — Portfolio
 
-## Getting Started
+Personal portfolio for Ali Hamza, Full-Stack Software Engineer in Regensburg, Germany.
+Built with Next.js (App Router), TypeScript, Tailwind CSS v4, Motion and React Three Fiber.
 
-First, run the development server:
+## Run locally
 
 ```bash
+npm install
+cp .env.example .env.local   # then fill in the values
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Environment variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Name | Purpose |
+|---|---|
+| `NEXT_PUBLIC_SITE_URL` | Absolute public URL, used for metadata, Open Graph image and sitemap. |
+| `RESEND_API_KEY` | Resend API key for the contact form. Without it the form returns a friendly "not configured" message. |
+| `CONTACT_TO_EMAIL` | Inbox that receives contact form messages. |
+| `CONTACT_FROM_EMAIL` | Sender shown on the email. Use `onboarding@resend.dev` until a domain is verified in Resend. |
 
-## Learn More
+## Editing content
 
-To learn more about Next.js, take a look at the following resources:
+All copy lives in `src/content/`. Nothing is hard-coded in components.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| File | What it holds |
+|---|---|
+| `profile.ts` | Name, title, location, contact details, bios, marquee technologies. Set `headshot`, `calendarUrl` and `cvUrl` once the assets exist. |
+| `experience.ts` | Work history. Dates are `YYYY-MM`; the overlap chart is drawn from them. |
+| `projects.ts` | Featured and other projects. `myWork` is personal contribution; `productCapabilities` is the team/product. |
+| `skills.ts` | Skill groups with a proof level per item (`professional`, `project`, `learning`). |
+| `ai-journey.ts` | The three AI proof tiers and the roadmap list. |
+| `education.ts` | Degrees and certifications. |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Images
 
-## Deploy on Vercel
+Originals live in `assets/source/` and are never served directly:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```
+assets/source/profile/ali-hamza.png              -> public/images/profile/ali-hamza.webp (+ a 480px JPEG for Open Graph)
+assets/source/projects/<project-id>/<name>.png   -> public/images/projects/<project-id>/<name>.webp
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Run `npm run images` after adding or replacing a file. It resizes, converts to WebP and regenerates `src/content/images.generated.ts` (sizes and blur placeholders). Then reference the output path in `projects.ts` under `images` with an `alt` and a `caption`; the first entry is the cover. A path that does not exist is skipped, so nothing ever renders broken.
+
+## Content rules
+
+- No metrics, testimonials, titles or links that are not verified.
+- Personal contribution is always separated from team or product capability.
+- Public personal data is limited to name, city, professional email, the approved phone number and public social profiles.
+
+## Deploy
+
+1. Push to GitHub and import the repository in Vercel.
+2. Add the environment variables above in the Vercel project settings.
+3. Attach the custom domain and set `NEXT_PUBLIC_SITE_URL` to match.
+
+## Scripts
+
+- `npm run dev` — development server
+- `npm run build` — production build
+- `npm run start` — serve the production build
+- `npm run lint` — ESLint

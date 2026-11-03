@@ -1,0 +1,14 @@
+Momspreneur Match — execution platform
+A mission-based platform that turns business goals into tracked workflows, with collaboration pods for accountability and a real-time dashboard across the member base.
+
+The problem
+Members had goals but no structure for executing against them.
+No accountability loop, so momentum died after the first week.
+No visibility into who was progressing and who had stalled.
+What we built
+Mission engine converting goals into tracked, sequenced work
+AI assistant for guidance and content refinement
+Collaboration pods for peer accountability
+Real-time progress and engagement dashboard
+Stack
+React · Node · AI assistant
